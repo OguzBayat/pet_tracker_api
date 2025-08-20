@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pet Tracking API Documentation</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css"
+    />
+    <style>
+      html {
+        box-sizing: border-box;
+        overflow: -moz-scrollbars-vertical;
+        overflow-y: scroll;
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+      body {
+        margin: 0;
+        background: #fafafa;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+      window.onload = function () {
+        const ui = SwaggerUIBundle({
+          spec: {
+            openapi: "3.0.1",
+            info: {
+              title: "Pet Tracking API",
+              description:
+                "API for tracking pets (dogs and cats) and calculating statistics about pets outside the power saving zone.",
+              version: "1.0.0",
+            },
+            servers: [
+              {
+                url: "http://localhost:3000",
+                description: "Development server",
+              },
+            ],
+            paths: {
+              "/api/v1/pets": {
+                get: {
+                  summary: "Get all pets",
+                  tags: ["Pets"],
+                  responses: {
+                    200: {
+                      description: "List of pets",
+                      content: {
+                        "application/json": {
+                          schema: {
+                            type: "array",
+                            items: {
+                              $ref: "#/components/schemas/Pet",
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                post: {
+                  summary: "Create a new pet",
+                  tags: ["Pets"],
+                  requestBody: {
+                    required: true,
+                    content: {
+                      "application/json": {
+                        schema: {
+                          type: "object",
+                          properties: {
+                            pet: {
+                              $ref: "#/components/schemas/PetCreate",
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                  responses: {
+                    201: {
+                      description: "Pet created successfully",
+                      content: {
+                        "application/json": {
+                          schema: {
+                            $ref: "#/components/schemas/Pet",
+                          },
+                        },
+                      },
+                    },
+                    422: {
+                      description: "Validation error",
+                      content: {
+                        "application/json": {
+                          schema: {
+                            $ref: "#/components/schemas/Error",
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "/api/v1/pets/{id}": {
+                parameters: [
+                  {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    schema: {
+                      type: "integer",
+                    },
+                    description: "Pet ID",
+                  },
+                ],
+                get: {
+                  summary: "Get a specific pet",
+                  tags: ["Pets"],
+                  responses: {
+                    200: {
+                      description: "Pet details",
+                      content: {
+                        "application/json": {
+                          schema: {
+                            $ref: "#/components/schemas/Pet",
+                          },
+                        },
+                      },
+                    },
+                    404: {
+                      description: "Pet not found",
+                    },
+                  },
+                },
+                patch: {
+                  summary: "Update a pet",
+                  tags: ["Pets"],
+                  requestBody: {
+                    required: true,
+                    content: {
+                      "application/json": {
+                        schema: {
+                          type: "object",
+                          properties: {
+                            pet: {
+                              $ref: "#/components/schemas/PetUpdate",
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                  responses: {
+                    200: {
+                      description: "Pet updated successfully",
+                      content: {
+                        "application/json": {
+                          schema: {
+                            $ref: "#/components/schemas/Pet",
+                          },
+                        },
+                      },
+                    },
+                    404: {
+                      description: "Pet not found",
+                    },
+                    422: {
+                      description: "Validation error",
+                    },
+                  },
+                },
+                delete: {
+                  summary: "Delete a pet",
+                  tags: ["Pets"],
+                  responses: {
+                    204: {
+                      description: "Pet deleted successfully",
+                    },
+                    404: {
+                      description: "Pet not found",
+                    },
+                  },
+                },
+              },
+              "/api/v1/pets/statistics/outside_zone": {
+                get: {
+                  summary:
+                    "Get statistics for pets outside the power saving zone",
+                  tags: ["Statistics"],
+                  responses: {
+                    200: {
+                      description: "Statistics retrieved successfully",
+                      content: {
+                        "application/json": {
+                          schema: {
+                            $ref: "#/components/schemas/Statistics",
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            components: {
+              schemas: {
+                Pet: {
+                  type: "object",
+                  properties: {
+                    id: {
+                      type: "integer",
+                      description: "Unique identifier",
+                    },
+                    type: {
+                      type: "string",
+                      enum: ["Cat", "Dog"],
+                      description: "Type of pet",
+                    },
+                    tracker_type: {
+                      type: "string",
+                      description: "Type of tracker",
+                    },
+                    owner_id: {
+                      type: "integer",
+                      description: "Owner ID",
+                    },
+                    in_zone: {
+                      type: "boolean",
+                      description: "Whether pet is in power saving zone",
+                    },
+                    lost_tracker: {
+                      type: "boolean",
+                      description: "Whether tracker is lost (only for cats)",
+                    },
+                    created_at: {
+                      type: "string",
+                      format: "date-time",
+                    },
+                    updated_at: {
+                      type: "string",
+                      format: "date-time",
+                    },
+                  },
+                },
+                PetCreate: {
+                  type: "object",
+                  properties: {
+                    type: {
+                      type: "string",
+                      enum: ["Cat", "Dog"],
+                    },
+                    tracker_type: {
+                      type: "string",
+                    },
+                    owner_id: {
+                      type: "integer",
+                    },
+                    in_zone: {
+                      type: "boolean",
+                    },
+                    lost_tracker: {
+                      type: "boolean",
+                    },
+                  },
+                  required: [
+                    "tracker_type",
+                    "owner_id",
+                    "in_zone",
+                    "lost_tracker",
+                  ],
+                },
+                PetUpdate: {
+                  type: "object",
+                  properties: {
+                    tracker_type: {
+                      type: "string",
+                    },
+                    owner_id: {
+                      type: "integer",
+                    },
+                    in_zone: {
+                      type: "boolean",
+                    },
+                    lost_tracker: {
+                      type: "boolean",
+                    },
+                  },
+                },
+                Statistics: {
+                  type: "object",
+                  properties: {
+                    total_pets_outside_zone: {
+                      type: "integer",
+                    },
+                    by_pet_type: {
+                      type: "object",
+                      additionalProperties: {
+                        type: "integer",
+                      },
+                    },
+                    by_tracker_type: {
+                      type: "object",
+                      additionalProperties: {
+                        type: "integer",
+                      },
+                    },
+                    by_pet_and_tracker_type: {
+                      type: "object",
+                      additionalProperties: {
+                        type: "integer",
+                      },
+                    },
+                    cats_with_lost_tracker: {
+                      type: "integer",
+                    },
+                    cats_with_tracker: {
+                      type: "integer",
+                    },
+                    dogs_by_size: {
+                      type: "object",
+                      additionalProperties: {
+                        type: "integer",
+                      },
+                    },
+                  },
+                },
+                Error: {
+                  type: "object",
+                  properties: {
+                    errors: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          dom_id: "#swagger-ui",
+          deepLinking: true,
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+          plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+          layout: "StandaloneLayout",
+        });
+      };
+    </script>
+  </body>
+</html>
